@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
   
     master.vm.provision "shell", inline: <<-SHELL
       apt update
-      apt install -y python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev sshpass
+      apt install -y python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev sshpass python-ldap
       pip install ansible
     SHELL
   end
