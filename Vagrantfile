@@ -41,4 +41,13 @@ Vagrant.configure("2") do |config|
   end
 
 
+    config.vm.define "opendj" do |v|
+        v.vm.hostname = "openam.example.com"
+        v.vm.network :private_network, ip: "192.168.33.12"
+    
+	v.vm.provision "shell", inline: <<-SHELL
+	  apt update
+	  apt install -y openjdk-7-jdk
+	SHELL
+    end
 end
