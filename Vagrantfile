@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
 
-  config.vm.synced_folder "./frstack/ansible", "/vagrant_data"
+  config.vm.synced_folder "./ansible", "/vagrant_data"
 
   config.vm.define "master" do |master|
     
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
     master.vm.provision "shell", inline: <<-SHELL
       apt update
-      apt install -y python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev
+      apt install -y python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev sshpass
       pip install ansible
     SHELL
   end
@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
     
 	v.vm.provision "shell", inline: <<-SHELL
 	  apt update
-	  apt install -y openjdk-7-jdk
+	  apt install -y openjdk-7-jdk unzip
 	SHELL
     end
 end

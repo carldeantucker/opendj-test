@@ -1,0 +1,25 @@
+# This play is needed to install python2 on fedora 23
+#- hosts: all
+#  gather_facts: false
+#  tasks:
+#    - name: install packages for ansible support
+#      raw: sudo apt install python-dnf
+
+# These plays are common to all hosts in the stack. This installs basic packages, java, etc.
+# Put roles here that need to be run on every host in stack
+#- hosts: ois
+#  become: yes
+#  roles:
+#   - { role: download-nightly, tags: ["download"]}
+#   - create-fr-user
+#   - { role: install-base-apt, when: ansible_os_family == 'Debian', tags: ["base"]}
+#   - { role: install-base-centos, when: ansible_os_family == 'RedHat', tags: ["base"]}
+
+# Kubernetes is a bit of a pain to setup right now on a standalone OS. Let's revist this later
+#   - { role: k8-centos-local, tags: ["k8"]}
+
+# Play for ha-proxy server.
+- hosts: ldap
+  become: yes
+  roles:
+    - { role: opendj }

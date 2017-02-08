@@ -1,0 +1,61 @@
+---
+
+# Install the ForgeRock stack
+# This is a work in progress
+#
+# To run only a specific tag use the shellscript: bin/frstack tagname
+#
+# Before this is run it is assumed some basic pre-reqs have been completed:
+#
+# - The forgerock user has been created (default to fr). The software is installed using this account
+#  The "fr" user must be created with become priv. The vagrant.yml does this for you
+# - Appropriate Firewall ports must be open on the guest. We use haproxy to put most things through 80/443
+# Right now this is very much dependent on Fedora/Centos packages, etc.  There is a start at making it
+# Work on other platforms - but it needs work
+
+# This play is needed to install python2 on fedora 23
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: install packages for ansible support
+      raw: sudo dnf -y -e0 -d0 install python python-dnf
+
+# These plays are common to all hosts in the stack. This installs basic packages, java, etc.
+# Put roles here that need to be run on every host in stack
+- hosts: ois
+  become: yes
+  roles:
+#   - { role: download-nightly, tags: ["download"]}
+   - create-fr-user
+   - { role: install-base-apt, when: ansible_os_family == 'Debian', tags: ["base"]}
+   - { role: install-base-centos, when: ansible_os_family == 'RedHat', tags: ["base"]}
+
+# Kubernetes is a bit of a pain to setup right now on a standalone OS. Let's revist this later
+#   - { role: k8-centos-local, tags: ["k8"]}
+
+# Play for ha-proxy server.
+- hosts: haproxy
+  become: yes
+  roles:
+    - { role: haproxy, tags: ["http","haproxy"]}
+
+
+- hosts: ois
+  become: yes
+  roles:
+   - { role: apache-centos, when: ansible_os_family == 'RedHat', tags: ["http"]}
+   - { role: tomcat, tomcat_instance: 'openam', tomcat_base_port: 8000,
+       tags: ["tomcat", "openam"]}
+   - { role: tomcat, tomcat_instance: 'openig', tomcat_base_port: 2000,
+       tags: ["tomcat", "openig"]}
+   - { role: tomcat, tomcat_instance: 'apps', tomcat_base_port: 3000,
+       tags: ["tomcat", "apps"]}
+   - { role: opendj, tags: ["opendj"]}
+   - { role: openidm, tags: ["openidm"]}
+   - { role: openam,  tomcat_openam_dir: "{{tomcat_parent}}/openam", tags: ["openam"]}
+   - { role: ssoadm, tags: ["ssoadm"]}
+   - { role: openig,  tags: ["openig"]}
+   - { role: agent-apache, tags: ["agent", "apache", "agent-apache", "test"]}
+# Note that tomcat-agent install is currently not working.
+   - { role: agent-tomcat,  tomcat_instance: 'apps',
+         tomcat_port: 3080, tags: ["agent","tomcat-agent"]}
