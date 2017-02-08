@@ -26,28 +26,26 @@ Vagrant.configure("2") do |config|
 
   config.vm.synced_folder "./ansible", "/vagrant_data"
 
+ config.vm.define "opendj" do |v|
+        v.vm.hostname = "openam.example.com"
+        v.vm.network :private_network, ip: "192.168.33.12"
+	v.vm.provider :virtualbox do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "2048"]
+	end
+        v.vm.provision "shell", inline: <<-SHELL
+          apt update
+          apt install -y openjdk-7-jdk unzip
+        SHELL
+    end
+
   config.vm.define "master" do |master|
     
    master.vm.network "private_network", ip: "192.168.33.10"
   
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
-  # documentation for more information about their specific syntax and use.
     master.vm.provision "shell", inline: <<-SHELL
       apt update
       apt install -y python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg8-dev zlib1g-dev sshpass
       pip install ansible
     SHELL
   end
-
-
-    config.vm.define "opendj" do |v|
-        v.vm.hostname = "openam.example.com"
-        v.vm.network :private_network, ip: "192.168.33.12"
-    
-	v.vm.provision "shell", inline: <<-SHELL
-	  apt update
-	  apt install -y openjdk-7-jdk unzip
-	SHELL
-    end
 end
